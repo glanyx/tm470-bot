@@ -40,6 +40,14 @@ export class ModLog extends DBModel<IModLog> {
     `, ModLog)
   }
 
+  public static async fetchByUserId(guildId: string, userId: string) {
+    return super.query<ModLog>(`
+      SELECT * FROM ${collection}
+        WHERE "guildId" = '${guildId}'
+        AND  "targetId" = '${userId}'
+    `, ModLog)
+  }
+
   public get id() {
     return this.data.id
   }

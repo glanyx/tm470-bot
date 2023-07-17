@@ -67,7 +67,8 @@ export class Mute extends SlashCommand {
     const hours = (interaction.options.get('hours')?.value as number | undefined) || 0
     const days = (interaction.options.get('days')?.value as number | undefined) || 0
 
-    const sumDuration = seconds + minutes + hours + days
+    const sumDuration = (seconds + minutes * 60 + hours * 60 * 60 + days * 60 * 60 * 24) * 1000
+    if (sumDuration === 0) return interaction.editReply('Please provide at least one value for the duration of the mute!')
     const duration = sumDuration > MAX ? MAX : sumDuration
 
     const member = guild.members.cache.get(targetId) || await guild.members.fetch(targetId)
@@ -91,12 +92,21 @@ export class Mute extends SlashCommand {
         if (!mutedRole) return interaction.editReply(`There was an error muting the specified member.`)
 
         member.roles.add(mutedRole)
-
         await member.send(`You were **muted** in ${guild.name}!\nReason: ${reason}`)
-        interaction.editReply(`${member} was banned.\nReason: ${reason}`)
+        interaction.editReply(`${member} was muted.\nReason: ${reason}`)
 
         const ch: GuildBasedChannel | null = guild.channels.cache.get(setting.logChannelId) || await guild.channels.fetch(setting.logChannelId)
         if (ch && ch.isTextBased()) ch.send(`${member} was muted.\nReason: ${reason}`)
+
+        const removeMutedRole = async () => {
+          member.roles.remove(mutedRole)
+          await member.send(`You were **unmuted** in ${guild.name}!`)
+          if (ch && ch.isTextBased()) ch.send(`${member} was unmuted.`)
+        }
+
+        setTimeout(() => {
+          removeMutedRole()
+        }, duration)
 
         ModLog.storeNewAction({
           userId: (authorMember as GuildMember).id,
@@ -104,6 +114,7 @@ export class Mute extends SlashCommand {
           guildId: guild.id,
           action: ModeratorAction.MUTE,
           reason,
+          muteEnd: new Date(Date.now() + duration)
         })
           .then(() => console.log(`Mute for User ID ${member.id} stored to DB`))
           .catch(e => console.log(`Unable to store mute for User ID ${member.id} to DB.\nReason: ${e.message}`))
