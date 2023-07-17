@@ -1,5 +1,5 @@
-import { Ping } from './ping'
+import { Kick } from './kick'
 
 export default [
-  Ping,
+  Kick,
 ]
