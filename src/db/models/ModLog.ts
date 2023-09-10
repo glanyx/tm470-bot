@@ -44,7 +44,7 @@ export class ModLog extends DBModel<IModLog> {
     return super.query<ModLog>(`
       SELECT * FROM ${collection}
         WHERE "guildId" = '${guildId}'
-        AND  "targetId" = '${userId}'
+        AND "targetId" = '${userId}'
     `, ModLog)
   }
 

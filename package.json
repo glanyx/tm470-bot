@@ -6,7 +6,8 @@
   "scripts": {
     "start": "ts-node -r dotenv/config src/index.ts",
     "deploy": "ts-node -r dotenv/config src/deploy.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker": "docker build -t tm470-bot ."
   },
   "author": "",
   "license": "ISC",
